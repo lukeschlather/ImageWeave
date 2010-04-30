@@ -47,12 +47,14 @@ int main(int argc, char** argv) {
 
 
   ImageSet bunch = ImageSet("/home/project/");
+  cout << "Read in " << bunch.count() << " images." << endl;
+
   CImg<uchar> image("/home/project/Pittsburgh_November_013.JPG"), visu(500,400,1,3,0);
   std::cout << image.width() << " " << image.height() << std::endl;
   image = image.resize(image.width()/2,image.height()/2);
   const uchar red[] = { 255,0,0 }, green[] = { 0,255,0 }, blue[] = { 0,0,255 };
   image.blur(2.5);
-  CImgDisplay main_disp(image,"Click a point"), draw_disp(visu,"Intensity profile"),library(bunch.get_list(), "Image Library");
+  CImgDisplay main_disp(image,"Click a point"), draw_disp(visu,"Intensity profile"),library(  bunch.weaveAll(10,10), "Image Library");
   while (!main_disp.is_closed() && !draw_disp.is_closed()) {
     main_disp.wait();
     if (main_disp.button() && main_disp.mouse_y()>=0) {

@@ -2,6 +2,7 @@
 // Saturday, April 17 2010
 // Licensed under the LGPL
 #include<iostream>
+#include<vector>
 #include "ImageSet.h"
 #include <boost/filesystem.hpp>
 using namespace std;
@@ -35,6 +36,9 @@ ImageSet::ImageSet(const char* imagedir) {
 	  if (aspectRatio > .5 && aspectRatio < 2) {
 	    cout << "'good' aspect ratio:" << aspectRatio << endl;
 	    bunch.push_back(image.resize(width,height));
+	    iwidth=bunch.back().width();
+	    iheight=bunch.back().height();
+	    cout << iwidth <<"x" << iheight << endl;
 	  } else {
 	    cout << "Aspect ratio too weird: "<< aspectRatio << ": " << iwidth << "x" << iheight << endl;
 	  }
@@ -56,4 +60,47 @@ ImageSet::ImageSet(const char* imagedir) {
       throw 3;
     }
     
+}
+
+Image ImageSet::weaveAll(int h, int w) {
+  vector< vector <int> > all;
+  int i=0;
+  for( int y=0;y<h;++y) {
+    all.push_back(vector<int>());
+    for( int x=0;x<w;++x) {
+      all[y].push_back((i++) % bunch.width());
+    }
+  }
+  
+  return this->weave(all);
+}
+
+Image ImageSet::weave(vector< vector<int> >& matrix) {
+  // Todo: test ordering. CImg appears to use sensible (x,y)
+  // addressing. I may need to be sensible.
+  double ydim=matrix.size();
+  double xdim=matrix[0].size();
+  
+  Image ret(ydim*height,xdim*width,1,3,0);
+  
+  for (int y=0;y<ydim;++y) {
+    for (int x=0;x<xdim;++x) {
+      for(int a=0;a<width;++a) {
+  	for(int b=0;b<height;++b) {
+	  // Naturally only copies the red channel...
+	  // ret(y*height + a, x*width + b) = bunch[matrix[y][x]](a,b);
+	  uchar *dest =  &( ret(y*height + a, x*width + b) );
+	  uchar *src  =  &( bunch[matrix[y][x]](a,b) );
+	  cout << src[0] << " "  << src[1] << " " << src[2] << endl;	  
+	  dest[0] = src[0];
+
+	  dest[1] = src[1];
+	  dest[2] = src[2];
+  	}
+      }
+    }
+  }
+
+  
+  return ret;
 }

@@ -16,7 +16,7 @@ class ImageSet {
 
 public:
   // Reads all files in a directory, determines which ones are images,
-  // and scales them to width by height, adding them to the bunch vector.
+  // and scales them to width by height, adding them to the bunch CImgList.
   // Error codes:
   // 2: imagedir does not exist.
   // 3: imagedir is not a directory.
@@ -29,8 +29,17 @@ public:
   static void setWidth(const int& wid) { width = wid; }
   static void setHeight(const int& hei) { height=hei; }
 
-  Image operator[] (const int & id);
+  int count() {
+    return bunch.width();
+  }
   
+  Image operator[] (const int & id);
+
+  // Takes a two-dimensional array of image ids, and outputs a single
+  // image built of those images. **Expects a rectangle.**
+  Image weave(std::vector< std::vector<int> >& matrix);  
+
+  Image weaveAll(int x, int y);
 };
 
 #endif // _IMAGELOADER_
