@@ -2,10 +2,13 @@
 // Monday, April 12 2010
 // Licensed under the LGPL
 #include <boost/filesystem.hpp>
-#include "ImageSet.h"
 #include <iostream>
 #include <unistd.h>
 #include <string>
+
+#include "ImageSet.h"
+#include "Loom.h"
+
 namespace fs = boost::filesystem;
 using namespace cimg_library;
 using namespace std;
@@ -48,21 +51,12 @@ int main(int argc, char** argv) {
 
   ImageSet bunch = ImageSet("/home/project/");
   cout << "Read in " << bunch.count() << " images." << endl;
-
-  CImg<uchar> image("/home/project/Pittsburgh_November_013.JPG"), visu(500,400,1,3,0);
-  std::cout << image.width() << " " << image.height() << std::endl;
-  image = image.resize(image.width()/2,image.height()/2);
-  const uchar red[] = { 255,0,0 }, green[] = { 0,255,0 }, blue[] = { 0,0,255 };
-  image.blur(2.5);
-  CImgDisplay main_disp(image,"Click a point"), draw_disp(visu,"Intensity profile"),library(  bunch.weaveAll(10,10), "Image Library");
-  while (!main_disp.is_closed() && !draw_disp.is_closed()) {
-    main_disp.wait();
-    if (main_disp.button() && main_disp.mouse_y()>=0) {
-      const int y = main_disp.mouse_y();
-      visu.fill(0).draw_graph(image.get_crop(0,y,0,0,image.width()-1,y,0,0),red,1,1,0,255,0);
-      visu.draw_graph(image.get_crop(0,y,0,1,image.width()-1,y,0,1),green,1,1,0,255,0);
-      visu.draw_graph(image.get_crop(0,y,0,2,image.width()-1,y,0,2),blue,1,1,0,255,0).display(draw_disp);
-      
+  
+  CImgDisplay library(  bunch.weaveAll(10,10), "Image Library");
+  while ( !library.is_closed() ) {
+    library.wait();
+    if (library.button() && library.mouse_y()>=0) {
+      const int y = library.mouse_y();
     }
   }
   return 0;

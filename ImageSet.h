@@ -28,10 +28,10 @@ public:
   cimg_library::CImgList<uchar> & get_list() {return bunch;}
   static void setWidth(const int& wid) { width = wid; }
   static void setHeight(const int& hei) { height=hei; }
-
-  int count() {
-    return bunch.width();
-  }
+  
+  double getWidth()  { return width;  }
+  double getHeight() { return height; } 
+  int count() {  return bunch.width(); }
   
   Image operator[] (const int & id);
 

@@ -65,10 +65,10 @@ ImageSet::ImageSet(const char* imagedir) {
 Image ImageSet::weaveAll(int h, int w) {
   vector< vector <int> > all;
   int i=0;
-  for( int y=0;y<h;++y) {
+  for( int x=0;x<w;++x) {
     all.push_back(vector<int>());
-    for( int x=0;x<w;++x) {
-      all[y].push_back((i++) % bunch.width());
+    for( int y=0;y<h;++y) {
+      all[x].push_back((i++) % bunch.width());
     }
   }
   
@@ -76,31 +76,22 @@ Image ImageSet::weaveAll(int h, int w) {
 }
 
 Image ImageSet::weave(vector< vector<int> >& matrix) {
-  // Todo: test ordering. CImg appears to use sensible (x,y)
-  // addressing. I may need to be sensible.
-  double ydim=matrix.size();
-  double xdim=matrix[0].size();
+  double xdim=matrix.size();
+  double ydim=matrix[0].size();
   
-  Image ret(ydim*height,xdim*width,1,3,0);
+  Image ret(xdim*width,ydim*height,1,3,0);
   
-  for (int y=0;y<ydim;++y) {
-    for (int x=0;x<xdim;++x) {
+  for (int x=0;x<xdim;++x) {
+    for (int y=0;y<ydim;++y) {
       for(int a=0;a<width;++a) {
   	for(int b=0;b<height;++b) {
-	  // Naturally only copies the red channel...
-	  // ret(y*height + a, x*width + b) = bunch[matrix[y][x]](a,b);
-	  uchar *dest =  &( ret(y*height + a, x*width + b) );
-	  uchar *src  =  &( bunch[matrix[y][x]](a,b) );
-	  cout << src[0] << " "  << src[1] << " " << src[2] << endl;	  
-	  dest[0] = src[0];
-
-	  dest[1] = src[1];
-	  dest[2] = src[2];
+	  CImg<uchar> &src =  bunch[matrix[y][x]];
+	  ret( x*width + a,y*height + b,0)= src(a,b,0);
+	  ret( x*width + a,y*height + b,1)= src(a,b,1);
+	  ret( x*width + a,y*height + b,2)= src(a,b,2);
   	}
       }
     }
   }
-
-  
   return ret;
 }

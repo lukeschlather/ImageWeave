@@ -23,7 +23,7 @@ TARGET = ImageWeave
 USEMAGICK = 1
 endif
 
-OBJS = main$(OBJ) ImageSet$(OBJ)
+OBJS = main$(OBJ) ImageSet$(OBJ) Loom$(OBJ)
 CC = g++
 DEBUG = -g
 CFLAGS = -Wall -c $(DEBUG) $(OSFLAGS) $(OSCFLAGS)
@@ -52,6 +52,8 @@ endif
 # Application$(OBJ) : Application.cpp Application.h Tesselator.h polygon.h fim.h
 # 	$(CC) $(CFLAGS) Application.cpp
 
+Loom$(OBJ) : Loom.h Loom.cpp
+	$(CC) $(CFLAGS) Loom.cpp
 ImageSet$(OBJ) : ImageSet.h ImageSet.cpp
 	$(CC) $(CFLAGS) ImageSet.cpp
 
