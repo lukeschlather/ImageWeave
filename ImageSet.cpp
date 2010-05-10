@@ -108,23 +108,26 @@ Image ImageSet::weave(vector< vector<int> >& matrix) {
 map<int, vector<int> > & ImageSet::sort(int tol,double pct) {
   int count = bunch.width();
   threshold=tol;
+
   for(int i=0; i<count; ++i) {
     map<int, vector<int> >::iterator end=sorted.end();
     int bestGroup = -1;
     double bestValue = 0;
 
     for ( map<int, vector<int> >::iterator group=sorted.begin();group !=end;++group) {
+      
       double total=0;
-      cout << "Group : " << group->first << endl;
+      
       unsigned int number = group->second.size();
       for (unsigned int member=0; member < number; ++member) {
-	double thepct = badPercent(i,group->second[member]);
+	double thepct = percentMatch(i,group->second[member]);
 	total+= thepct;
-	cout << "total: "  << total << " Percent: "  << thepct << endl;
+	//	cout << "total: "  << total << " Percent: "  << thepct << endl;
       }
       double value = total/number;
-      cout << "value: " << value << endl;
+      
       if ( (pct<value) && (pct>bestValue) ) {
+
 	bestGroup=group->first;
 	bestValue=value;
       }
@@ -132,41 +135,39 @@ map<int, vector<int> > & ImageSet::sort(int tol,double pct) {
     
     if (bestGroup<0) {
       sorted.insert(pair<int,vector<int> >(i,vector<int>()));
-      cout << "NEW GROUP: " << i << endl;
+
       (sorted.find(i) )->second.push_back(i);
     } else {
       (sorted.find(bestGroup) )->second.push_back(i);
     }
   }
   cout << "DONE SORTING\n\n\n\n\n=========================================="<< endl;
+  int groupCount=0;
   map<int, vector<int> >::iterator end=sorted.end();
   for ( map<int, vector<int> >::iterator group=sorted.begin();group !=end;++group) {
-    cout << "Group : " << group->first << endl;
-      for (unsigned int member=0; member < group->second.size(); ++member) {
-	cout << "\t" << group->second[member] << endl;
-      }
+    cout << "Group : " << ++groupCount << "size: "  << group->second.size() << endl;
   }
   
   return sorted;
 }
 
 
-double ImageSet::badPercent(int img1, int img2) {
+double ImageSet::percentMatch(int img1, int img2) {
   CImg<uchar> &one  = bunch[img1];
   CImg<uchar> &two =  bunch[img2];
-  double bad=0;
+  double good=0;
   for (int x=0;x<width;++x) {
     for (int y=0;y<height;++y) {
-      bool isbad=0;
+      bool isgood=0;
       for (int c=0;c<3;++c) {
-	if ( abs( ((int) one(x,y,c) )- (int)two(x,y,c) ) > threshold ) {
-	  isbad=true;
+	if ( abs( ((int) one(x,y,c) )- (int)two(x,y,c) ) < threshold ) {
+	  isgood=true;
 	}
       }
-      if (isbad) {
-	++bad;
+      if (isgood) {
+	++good;
       }
     }
   }
-  return bad/(width*(double)height);
+  return good/(width*(double)height);
 }

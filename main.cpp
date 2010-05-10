@@ -19,13 +19,15 @@ int main(int argc, char** argv) {
   //   cout << usage << endl;
   //   exit(0);
   // } // no file
-  int threshold = 100;
+  int threshold = 40;
   double pct = .75;
   ImageSet::setWidth(24);
   ImageSet::setHeight(18);
+  float scale = 1;
   char c;
-  string usage("ImageWeave <directory> \n -h : Print this message. \n -x <width> : set x dimension for image cells  \n -y <height> : set y dimension for image cells \n");
-  while ((c =getopt(argc,argv,"hx:y:t:p:"))!=-1) {
+  string directory("/home/project");
+  string usage("ImageWeave -d <directory> \n -h : Print this message. \n -x <width> : set x dimension for image cells  \n -y <height> : set y dimension for image cells \n");
+  while ((c =getopt(argc,argv,"hd:s:x:y:t:p:"))!=-1) {
     switch(c) {
     case 'h':
       cout << usage << endl;
@@ -33,6 +35,9 @@ int main(int argc, char** argv) {
       break;
     case 'x':
       ImageSet::setWidth(atof(optarg));
+      break;
+    case 'd':
+      directory = string(optarg);
       break;
     case 'y':
       ImageSet::setHeight(atof(optarg));
@@ -42,6 +47,11 @@ int main(int argc, char** argv) {
       break;
     case 'p':
       pct = atof(optarg);
+      break;
+    case 's':
+      scale = atof(optarg);
+      ImageSet::setWidth(24*scale);
+      ImageSet::setHeight(18*scale);
       break;
     default:
       cout << "Unrecognized option: '" << c <<"'" << endl;
@@ -57,7 +67,7 @@ int main(int argc, char** argv) {
   // } 
 
 
-  ImageSet bunch = ImageSet("/home/project/");
+  ImageSet bunch = ImageSet(directory.c_str());
   cout << "Read in " << bunch.count() << " images." << endl;
   
   CImgDisplay library(  bunch.weaveAll(10,10), "Image Library");

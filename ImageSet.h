@@ -63,7 +63,7 @@ public:
   // threshold and percentage bounds.
   std::map<int, std::vector<int> > & sort(int thresh,double pct);
 
-  double badPercent(int img1, int img2);
+  double percentMatch(int img1, int img2);
   int avgDistance(int img1, int img2);
   int medDistance(int img1, int img2);
 
