@@ -10,9 +10,8 @@ using namespace cimg_library;
 namespace fs = boost::filesystem;
 
 
-extern double ImageSet::width=24;
-extern double ImageSet::height=18;
-
+double ImageSet::width;
+double ImageSet::height;
 
 ImageSet& ImageSet::copy(const ImageSet& src) {
   this->bunch=src.bunch;
@@ -103,58 +102,135 @@ Image ImageSet::weave(vector< vector<int> >& matrix) {
   return ret;
 }
 
-
-
-map<int, vector<int> > & ImageSet::sort(int tol,double pct) {
-  int count = bunch.width();
-  threshold=tol;
-
-  for(int i=0; i<count; ++i) {
-    map<int, vector<int> >::iterator end=sorted.end();
-    int bestGroup = -1;
-    double bestValue = 0;
-
-    for ( map<int, vector<int> >::iterator group=sorted.begin();group !=end;++group) {
-      
-      double total=0;
-      
-      unsigned int number = group->second.size();
-      for (unsigned int member=0; member < number; ++member) {
-	double thepct = percentMatch(i,group->second[member]);
-	total+= thepct;
-	//	cout << "total: "  << total << " Percent: "  << thepct << endl;
-      }
-      double value = total/number;
-      
-      if ( (pct<value) && (pct>bestValue) ) {
-
-	bestGroup=group->first;
-	bestValue=value;
+vector< vector<int> > randomConfiguration(int frameWidth, int frameHeight,int max) {
+    vector< vector<int> > current;
+    for (int x=0;x<frameWidth;++x) {
+      current.push_back(vector<int>());
+      for (int y=0;y<frameHeight;++y) {
+	//probably should use a better random; good enough for jazz. 
+	current[x].push_back(rand()%max);
+	//strictly speaking I guess jazz would need a good random number generator.
+	// though perhaps jazz is about a sort of order through chaos.
       }
     }
-    
-    if (bestGroup<0) {
-      sorted.insert(pair<int,vector<int> >(i,vector<int>()));
+    return current;
+}
 
-      (sorted.find(i) )->second.push_back(i);
-    } else {
-      (sorted.find(bestGroup) )->second.push_back(i);
+vector< vector<int> > mate(vector< vector<int> >& one,vector< vector<int> >two) {
+  vector< vector<int> > ret;
+  int left=0;
+  int right=0;
+  for(unsigned int i=0;i<one.size();++i) {
+    ret.push_back(vector<int>());
+    for(unsigned int j=0;j<one[0].size();++j) {
+      if(rand()%2) {
+	++right;
+	ret[i].push_back(one[i][j]);
+      } else {
+	++left;
+	ret[i].push_back(two[i][j]);
+      }
     }
   }
-  cout << "DONE SORTING\n\n\n\n\n=========================================="<< endl;
-  int groupCount=0;
-  map<int, vector<int> >::iterator end=sorted.end();
-  for ( map<int, vector<int> >::iterator group=sorted.begin();group !=end;++group) {
-    cout << "Group : " << ++groupCount << "size: "  << group->second.size() << endl;
+  cout << "ratio: " << right << " " << left << endl;
+  cout << "ret dimensions:" << ret.size() << " " << ret[0].size() << endl;
+  cout << "one dimensions:" << one.size() << " " << one[0].size() << endl;
+  return ret;
+}
+
+std::vector< std::vector<int> > ImageSet::geneticAlgorithm(CImg<uchar> & mold, int iterations, int popcount, int thresh, double pct) {
+  //this needs to be refactored away
+  threshold=thresh;
+  int best=-1;
+  //might want to provide ability to pass a seed in. Dunno what rand to use though.
+  srand(time(0));
+
+
+
+  // Possibly better implemented as parameters; on the other hand, 
+  // We don't want to be doing sub-pixel approximations. There's enough processing as it is.
+  // For now, assume that we've given an image that can be evenly covered without changing
+  // the image width/height of our tiles.
+  int frameWidth = mold.width() / width;
+  int frameHeight = mold.height() / height;
+
+  // populate a randomized vector of configurations to serve as the initial population.
+  vector< vector< vector<int> > > population;
+  for (int config = 0; config<popcount; ++config) {
+    population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
   }
   
-  return sorted;
+  for (int iter=0; iter < iterations ;++iter )  {
+    multimap<double,int> quality;
+
+    for (int current=0;current<popcount;++current) {
+      double currentQual=0;
+      for(int x=0;x<frameWidth;++x) {
+	for (int y=0;y<frameHeight;++y) {
+	  double match = percentMatch(mold,x*width,y*height,bunch[population[current][x][y]]);
+	  if (match > pct) {
+	    currentQual+= match*5;
+	  }
+	  currentQual+=match;
+	}
+      }
+      cout << "Quality "  << currentQual << endl;
+      quality.insert(pair<double,int>(currentQual,current));
+    }
+    
+    vector < vector< vector<int> > > newPop;
+    multimap<double,int>::iterator begin,end;
+    begin=quality.begin();
+    best=begin->second;
+    end=quality.end();
+    for (int i=0;i< (popcount/3);++i) {
+      newPop.push_back(population[begin->second]);
+    }
+    population=newPop;
+    int breedcount=popcount/3;
+    while((int)population.size() < popcount) {
+      //population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
+      population.push_back(
+			   mate(
+				newPop[rand()%breedcount],
+				newPop[rand()%breedcount]
+					));
+    }
+
+  }
+  
+  cout << "Frame: "  << frameWidth << " " << frameHeight << endl;
+    
+  
+  //this function is a stub.
+  return population[best];
 }
 
 
 double ImageSet::percentMatch(int img1, int img2) {
-  CImg<uchar> &one  = bunch[img1];
-  CImg<uchar> &two =  bunch[img2];
+  return percentMatch(bunch[img1],bunch[img2]);
+}
+
+double ImageSet::percentMatch(CImg<uchar> &mold, double moldMinX, double moldMinY, CImg<uchar> &two) {
+  double good=0;
+  for (int x=0;x<width;++x) {
+    for (int y=0;y<height;++y) {
+      bool isgood=0;
+      for (int c=0;c<3;++c) {
+	if ( abs( ((int) mold(moldMinX + x,moldMinY +y,c) )- (int)two(x,y,c) ) < threshold ) {
+	  isgood=true;
+	}
+      }
+      if (isgood) {
+	++good;
+      }
+    }
+  }
+  return good/(width*(double)height);
+}
+
+
+double ImageSet::percentMatch(CImg<uchar> &one, CImg<uchar> &two) {
   double good=0;
   for (int x=0;x<width;++x) {
     for (int y=0;y<height;++y) {
@@ -171,3 +247,41 @@ double ImageSet::percentMatch(int img1, int img2) {
   }
   return good/(width*(double)height);
 }
+
+
+
+// something resembling the algorithm... 
+// pair<double,vector<Node>::iterator>  graphAdd(Node& currentNode, const int &id) {
+//   map<double,vector<Node>::iterator> values;
+//   vector<Node>::iterator end = currentNode.second.end();
+//   pair<double,vector<Node>::iterator> best = pair<double,vector<Node>::iterator>(0,vector<Node>::iterator());
+
+//   for ( vector<Node>::iterator begin = currentNode.second.begin(); begin !=end;++end) {
+
+//     // calculate percent value at threshold, given depth
+//     pair<double,vector<Node>::iterator> current = graphAdd(currentNode,id);
+//     if (current.first > best.first) {
+//       best=current;
+//     }
+//   }
+//   return best;
+// }
+
+
+// map<int, vector<int> > & ImageSet::sort(int tol,double pct) {
+//   int count = bunch.width();
+//   threshold=tol;
+//   Node root;
+//   root.first=-1;
+//   Node& currentNode = root;
+
+//   for(int i=0; i<count; ++i) {
+//     while ( currentNode.first == -1) {
+//       int bestNode = -1;
+//     double bestValue = 0;
+
+//     }
+//   return sorted;
+// }
+
+

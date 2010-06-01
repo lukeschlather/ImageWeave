@@ -26,8 +26,8 @@ endif
 OBJS = main$(OBJ) ImageSet$(OBJ) Loom$(OBJ)
 CC = g++
 DEBUG = -g
-CFLAGS = -Wall -c $(DEBUG) $(OSFLAGS) $(OSCFLAGS)
-LFLAGS = -Wall $(DEBUG) $(OSFLAGS) $(OSLFLAGS)
+CFLAGS = -Wall -Wextra -c $(DEBUG) $(OSFLAGS) $(OSCFLAGS)
+LFLAGS = -Wall -Wextra $(DEBUG) $(OSFLAGS) $(OSLFLAGS)
 
 # ifeq ($(OSTYPE),win32)
 # CC = cl

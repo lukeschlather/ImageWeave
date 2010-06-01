@@ -6,10 +6,17 @@
 #include<map>
 typedef unsigned char uchar;
 typedef cimg_library::CImg<uchar> Image;
+
+class Node;
+
+class Node : public std::pair<int, std::vector<Node> > {
+  
+};
+
 // Luke Schlather
 // Tuesday, April 13 2010
 // Licensed under the LGPL, see LICENSE.txt for the full text. 
-class ImageSet { 
+class ImageSet {
 private:
   static double width;
   static double height;
@@ -49,7 +56,7 @@ public:
   Image weave(std::vector< std::vector<int> >& matrix);  
   Image weaveAll(int x, int y);
 
-  std::map<int, std::vector<int> > sorted; 
+  std::map<int, std::vector<int> > similarityGraph; 
   // Sort based on a tolerance and percentage: 
   //Arguments: 
   //Threshold : maximum variation between color channels
@@ -63,7 +70,11 @@ public:
   // threshold and percentage bounds.
   std::map<int, std::vector<int> > & sort(int thresh,double pct);
 
+  std::vector< std::vector<int> > geneticAlgorithm(cimg_library::CImg<uchar> & mold, int iterations, int popcount, int thresh, double pct);
+
   double percentMatch(int img1, int img2);
+  double percentMatch(cimg_library::CImg<uchar> &one, cimg_library::CImg<uchar> &two);
+  double percentMatch(cimg_library::CImg<uchar> &mold, double moldMinX, double moldMinY, cimg_library::CImg<uchar> &two);
   int avgDistance(int img1, int img2);
   int medDistance(int img1, int img2);
 

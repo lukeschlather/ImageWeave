@@ -26,8 +26,9 @@ int main(int argc, char** argv) {
   float scale = 1;
   char c;
   string directory("/home/project");
+  string moldPath("/home/project/Pittsburgh_November_035.JPG");
   string usage("ImageWeave -d <directory> \n -h : Print this message. \n -x <width> : set x dimension for image cells  \n -y <height> : set y dimension for image cells \n");
-  while ((c =getopt(argc,argv,"hd:s:x:y:t:p:"))!=-1) {
+  while ((c =getopt(argc,argv,"hd:s:x:y:t:p:m:"))!=-1) {
     switch(c) {
     case 'h':
       cout << usage << endl;
@@ -35,6 +36,9 @@ int main(int argc, char** argv) {
       break;
     case 'x':
       ImageSet::setWidth(atof(optarg));
+      break;
+    case 'm':
+      moldPath=string(optarg);
       break;
     case 'd':
       directory = string(optarg);
@@ -71,8 +75,10 @@ int main(int argc, char** argv) {
   cout << "Read in " << bunch.count() << " images." << endl;
   
   CImgDisplay library(  bunch.weaveAll(10,10), "Image Library");
-  bunch.sort(threshold,pct);
-
+  //bunch.sort(threshold,pct);
+  CImg<uchar> mold(moldPath.c_str());
+  vector< vector<int> > tapestry = bunch.geneticAlgorithm(mold,10,10,50,60);
+  CImgDisplay result(bunch.weave(tapestry));
   while ( !library.is_closed() ) {
     library.wait();
     
