@@ -23,11 +23,11 @@ TARGET = ImageWeave
 USEMAGICK = 1
 endif
 
-OBJS = main$(OBJ) ImageSet$(OBJ) Loom$(OBJ)
+OBJS = main$(OBJ) ImageSet$(OBJ) Loom$(OBJ) LJFS_Utils$(OBJ)
 CC = g++
 DEBUG = -g
-CFLAGS = -Wall -Wextra -c $(DEBUG) $(OSFLAGS) $(OSCFLAGS)
-LFLAGS = -Wall -Wextra $(DEBUG) $(OSFLAGS) $(OSLFLAGS)
+CFLAGS = -Wall -Wextra -O3 -c $(DEBUG) $(OSFLAGS) $(OSCFLAGS)
+LFLAGS = -Wall -Wextra -O3 $(DEBUG) $(OSFLAGS) $(OSLFLAGS)
 
 # ifeq ($(OSTYPE),win32)
 # CC = cl
@@ -57,6 +57,8 @@ Loom$(OBJ) : Loom.h Loom.cpp
 ImageSet$(OBJ) : ImageSet.h ImageSet.cpp
 	$(CC) $(CFLAGS) ImageSet.cpp
 
+LJFS_Utils$(OBJ): LJFS_Utils.h LJFS_Utils.cpp
+	$(CC) $(CFLAGS) LJFS_Utils.cpp
 clean:
 	-$(RM) -f *$(OBJ) *~ $(TARGET)
 

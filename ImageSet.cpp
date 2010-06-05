@@ -2,9 +2,11 @@
 // Saturday, April 17 2010
 // Licensed under the LGPL
 #include<iostream>
+#include "Loom.h"
 #include<vector>
 #include "ImageSet.h"
 #include <boost/filesystem.hpp>
+#include "LJFS_Utils.h"
 using namespace std;
 using namespace cimg_library;
 namespace fs = boost::filesystem;
@@ -132,9 +134,9 @@ vector< vector<int> > mate(vector< vector<int> >& one,vector< vector<int> >two) 
       }
     }
   }
-  cout << "ratio: " << right << " " << left << endl;
-  cout << "ret dimensions:" << ret.size() << " " << ret[0].size() << endl;
-  cout << "one dimensions:" << one.size() << " " << one[0].size() << endl;
+  // cout << "ratio: " << right << " " << left << endl;
+  // cout << "ret dimensions:" << ret.size() << " " << ret[0].size() << endl;
+  // cout << "one dimensions:" << one.size() << " " << one[0].size() << endl;
   return ret;
 }
 
@@ -142,6 +144,8 @@ std::vector< std::vector<int> > ImageSet::geneticAlgorithm(CImg<uchar> & mold, i
   //this needs to be refactored away
   threshold=thresh;
   int best=-1;
+  int prevBestQuality = -2;
+  int bestQuality= -1;
   //might want to provide ability to pass a seed in. Dunno what rand to use though.
   srand(time(0));
 
@@ -162,41 +166,65 @@ std::vector< std::vector<int> > ImageSet::geneticAlgorithm(CImg<uchar> & mold, i
   
   for (int iter=0; iter < iterations ;++iter )  {
     multimap<double,int> quality;
-
+    int step = popcount/60;
+    printCurrentTime();
+    cout << "Calculating fitness [=";
     for (int current=0;current<popcount;++current) {
+      //progress bar
+      if(current%step == 0 ) {
+	cout << "=" << flush;
+      }
+
       double currentQual=0;
       for(int x=0;x<frameWidth;++x) {
 	for (int y=0;y<frameHeight;++y) {
 	  double match = percentMatch(mold,x*width,y*height,bunch[population[current][x][y]]);
-	  if (match > pct) {
+	  if (match < pct) {
 	    currentQual+= match*5;
 	  }
 	  currentQual+=match;
 	}
       }
-      cout << "Quality "  << currentQual << endl;
       quality.insert(pair<double,int>(currentQual,current));
     }
-    
+    cout << "]" << endl;
+
+
     vector < vector< vector<int> > > newPop;
     multimap<double,int>::iterator begin,end;
     begin=quality.begin();
     best=begin->second;
+    prevBestQuality=bestQuality;
+    bestQuality=begin->first;
     end=quality.end();
+
+    // Take the top third and breed a random subset of them to populate the array.
+    cout << " Best of the population: ";
     for (int i=0;i< (popcount/3);++i) {
-      newPop.push_back(population[begin->second]);
+      cout << begin->first << " ";
+      newPop.push_back(population[(begin++)->second]);
     }
+    cout << endl;
     population=newPop;
     int breedcount=popcount/3;
     while((int)population.size() < popcount) {
-      //population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
-      population.push_back(
-			   mate(
-				newPop[rand()%breedcount],
-				newPop[rand()%breedcount]
-					));
+      if ( rand()%3) {
+	population.push_back(
+			     mate(
+				  newPop[rand()%breedcount],
+				  newPop[rand()%breedcount]
+				  ));
+      } else {
+	population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
+      }
     }
 
+    cout << "Best of iteration: " << iter << ": " << bestQuality << ", index: " << best << endl;
+    // not the best idea... maybe
+    // if( bestQuality == prevBestQuality ) {
+    //   cout << "No change; quitting." << endl;
+    //   break;
+    // }
   }
   
   cout << "Frame: "  << frameWidth << " " << frameHeight << endl;
@@ -216,6 +244,7 @@ double ImageSet::percentMatch(CImg<uchar> &mold, double moldMinX, double moldMin
   for (int x=0;x<width;++x) {
     for (int y=0;y<height;++y) {
       bool isgood=0;
+      //unroll?
       for (int c=0;c<3;++c) {
 	if ( abs( ((int) mold(moldMinX + x,moldMinY +y,c) )- (int)two(x,y,c) ) < threshold ) {
 	  isgood=true;

@@ -4,8 +4,10 @@
 
 #include<vector>
 #include<map>
+#include<unistd.h>
 typedef unsigned char uchar;
 typedef cimg_library::CImg<uchar> Image;
+
 
 class Node;
 
