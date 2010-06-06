@@ -2,13 +2,14 @@
 #define _IMAGELOADER_
 #include "CImg.h"
 
+#include "Loom.h"
 #include<vector>
 #include<map>
 #include<unistd.h>
 typedef unsigned char uchar;
 typedef cimg_library::CImg<uchar> Image;
 
-
+typedef std::vector <std::vector <int> > Configuration;
 class Node;
 
 class Node : public std::pair<int, std::vector<Node> > {
@@ -57,6 +58,8 @@ public:
   // image built of those images. **Expects a rectangle.**
   Image weave(std::vector< std::vector<int> >& matrix);  
   Image weaveAll(int x, int y);
+
+  Configuration unravel(cimg_library::CImg<uchar> & input);
 
   std::map<int, std::vector<int> > similarityGraph; 
   // Sort based on a tolerance and percentage: 

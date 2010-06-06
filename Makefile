@@ -26,8 +26,11 @@ endif
 OBJS = main$(OBJ) ImageSet$(OBJ) Loom$(OBJ) LJFS_Utils$(OBJ)
 CC = g++
 DEBUG = -g
-CFLAGS = -Wall -Wextra -O3 -c $(DEBUG) $(OSFLAGS) $(OSCFLAGS)
-LFLAGS = -Wall -Wextra -O3 $(DEBUG) $(OSFLAGS) $(OSLFLAGS)
+OPTIMIZE = -O3
+#RUN = $(OPTIMIZE)
+RUN = $(DEBUG)
+CFLAGS = -Wall -Wextra  -c $(RUN) $(OSFLAGS) $(OSCFLAGS)
+LFLAGS = -Wall -Wextra  $(RUN) $(OSFLAGS) $(OSLFLAGS)
 
 # ifeq ($(OSTYPE),win32)
 # CC = cl
@@ -54,6 +57,7 @@ endif
 
 Loom$(OBJ) : Loom.h Loom.cpp
 	$(CC) $(CFLAGS) Loom.cpp
+
 ImageSet$(OBJ) : ImageSet.h ImageSet.cpp
 	$(CC) $(CFLAGS) ImageSet.cpp
 

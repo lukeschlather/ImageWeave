@@ -13,6 +13,17 @@
 namespace fs = boost::filesystem;
 using namespace cimg_library;
 using namespace std;
+
+
+void strike(CImg<uchar> & img,int x, int y, int c, int len) {
+  while (--len) {
+    for (int i=0;i<20;++i) {
+      img(x+i,y+i,c)= 255;
+    }
+    ++x, ++y;
+  }
+}
+
 int main(int argc, char** argv) {
   
   // if (argc < 2) {
@@ -86,6 +97,7 @@ int main(int argc, char** argv) {
   CImgDisplay library(  bunch.weaveAll(10,10), "Image Library");
   //bunch.sort(threshold,pct);
   CImg<uchar> mold(moldPath.c_str());
+  CImgDisplay blank(mold);
   vector< vector<int> > tapestry = bunch.geneticAlgorithm(mold,iterations,popcount,threshold,pct);
   CImgDisplay result(bunch.weave(tapestry));
   while ( !library.is_closed() ) {

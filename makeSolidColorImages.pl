@@ -13,13 +13,17 @@ if ($#ARGV > 2) {
     $y = $ARGV[1];
     $count = $ARGV[2];
 }
-
+$i=0;
 
 for (my $r=0;$r<256;$r+=$count) {
     for (my $g=0;$g<256;$g+=$count) {
 	for (my $b=0;$b<256;$b+=$count) {
-		`convert -size 28x18 \'xc:rgb($r,$g,$b)\'  $r\_$g\_$b.gif`;
-		print "convert -size 28x18 \'xc:rgb($r,$g,$b)\'  $r\_$g\_$b.gif\n";
+	    $nr= ($r+100)%255;
+	    $ng= ($g-150)%255;
+	    $nb= ($b+100)%255;
+	    `convert -size 28x18 -background \'rgb($r,$g,$b)\' -pointsize 20 -fill \'rgb($nr,$ng,$nb)\' label:$i    $r\_$g\_$b.gif`;
+	    print "convert  -size 28x18 -background \'rgb($r,$g,$b)\' -pointsize 20 -fill \'rgb($nr,$ng,$nb)\' label:$i    $r\_$g\_$b.gif\n";
+	    ++$i;
 	}
     }
 }

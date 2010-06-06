@@ -83,6 +83,27 @@ Image ImageSet::weaveAll(int h, int w) {
   return this->weave(all);
 }
 
+Configuration ImageSet::unravel(CImg<uchar> & input) {
+
+  Configuration ret;
+  int frameWidth = input.width() / width;
+  int frameHeight = input.height() / height;
+  CImg<uchar> tmp(width,height,1,3,0); 
+  
+  for (int x=0;x<frameWidth;++x) {
+    for (int y=0;y<frameHeight;++y) {
+      for(int a=0;a<width;++a) {
+	for(int b=0;b<height;++b) {
+	  tmp(a,b,0)= input( x*width + a,y*height + b,0); 
+  	  tmp(a,b,1)= input( x*width + a,y*height + b,1); 
+  	  tmp(a,b,2)= input( x*width + a,y*height + b,2); 
+  	}
+      }
+    }
+  }
+  return ret;
+}
+
 Image ImageSet::weave(vector< vector<int> >& matrix) {
   double xdim=matrix.size();
   double ydim=matrix[0].size();
@@ -140,7 +161,7 @@ vector< vector<int> > mate(vector< vector<int> >& one,vector< vector<int> >two) 
   return ret;
 }
 
-std::vector< std::vector<int> > ImageSet::geneticAlgorithm(CImg<uchar> & mold, int iterations, int popcount, int thresh, double pct) {
+Configuration ImageSet::geneticAlgorithm(CImg<uchar> & mold, int iterations, int popcount, int thresh, double pct) {
   //this needs to be refactored away
   threshold=thresh;
   int best=-1;
@@ -159,54 +180,63 @@ std::vector< std::vector<int> > ImageSet::geneticAlgorithm(CImg<uchar> & mold, i
   int frameHeight = mold.height() / height;
 
   // populate a randomized vector of configurations to serve as the initial population.
-  vector< vector< vector<int> > > population;
+  vector< Configuration > population;
   for (int config = 0; config<popcount; ++config) {
     population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
   }
   
   for (int iter=0; iter < iterations ;++iter )  {
     multimap<double,int> quality;
-    int step = popcount/60;
+    //int step = (popcount/60)+1;
     printCurrentTime();
-    cout << "Calculating fitness [=";
+    //cout << "Calculating fitness [=";
     for (int current=0;current<popcount;++current) {
       //progress bar
-      if(current%step == 0 ) {
+      /*      if(current%step == 0 ) {
 	cout << "=" << flush;
-      }
+	} */
 
       double currentQual=0;
       for(int x=0;x<frameWidth;++x) {
 	for (int y=0;y<frameHeight;++y) {
+	  //cout << endl << "image (" << x << ", " << y << ") ";
 	  double match = percentMatch(mold,x*width,y*height,bunch[population[current][x][y]]);
-	  if (match < pct) {
+	  if (match > pct) {
 	    currentQual+= match*5;
 	  }
 	  currentQual+=match;
+	  //	  cout << match << ",";
 	}
+	//	cout << endl;
       }
       quality.insert(pair<double,int>(currentQual,current));
     }
     cout << "]" << endl;
 
 
-    vector < vector< vector<int> > > newPop;
-    multimap<double,int>::iterator begin,end;
-    begin=quality.begin();
+    vector < Configuration > newPop;
+    multimap<double,int>::reverse_iterator begin,end;
+    begin=quality.rbegin();
     best=begin->second;
     prevBestQuality=bestQuality;
     bestQuality=begin->first;
-    end=quality.end();
+    end=quality.rend();
 
+    int breedcount=ceil(popcount/3);
     // Take the top third and breed a random subset of them to populate the array.
     cout << " Best of the population: ";
-    for (int i=0;i< (popcount/3);++i) {
+    for (int i=0;i< breedcount;++i) {
       cout << begin->first << " ";
       newPop.push_back(population[(begin++)->second]);
+      if( !(rand()%4) ) {
+	population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
+      }
+      population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
+      //      cout <<"fload"<< endl;
     }
-    cout << endl;
+    //    cout << endl;
     population=newPop;
-    int breedcount=popcount/3;
+
     while((int)population.size() < popcount) {
       if ( rand()%3) {
 	population.push_back(
@@ -230,7 +260,7 @@ std::vector< std::vector<int> > ImageSet::geneticAlgorithm(CImg<uchar> & mold, i
   cout << "Frame: "  << frameWidth << " " << frameHeight << endl;
     
   
-  //this function is a stub.
+  print(population[best]);
   return population[best];
 }
 
@@ -241,22 +271,32 @@ double ImageSet::percentMatch(int img1, int img2) {
 
 double ImageSet::percentMatch(CImg<uchar> &mold, double moldMinX, double moldMinY, CImg<uchar> &two) {
   double good=0;
+  //  cout <<  "matching:" << "(" << moldMinX << ", " << moldMinY << "): " << two << endl;
   for (int x=0;x<width;++x) {
     for (int y=0;y<height;++y) {
-      bool isgood=0;
+      bool isgood=1;
       //unroll?
+      //  cout << "m[" << moldMinX + x << " "  << moldMinY +y << "]: rgb(";
       for (int c=0;c<3;++c) {
-	if ( abs( ((int) mold(moldMinX + x,moldMinY +y,c) )- (int)two(x,y,c) ) < threshold ) {
-	  isgood=true;
+	//cout << (int)mold(moldMinX + x,moldMinY +y,c) << " ";
+      }
+      //      cout << ") - c[" << x << " " << y << "]: rgb(" ;
+      for (int c=0;c<3;++c) {
+	//	cout << (int)two(x,y,c) << " ";
+	if ( abs( ((int) mold(moldMinX + x,moldMinY +y,c) )- (int)two(x,y,c) ) > threshold ) {
+	  isgood=false;
 	}
       }
+      cout << ", ";
       if (isgood) {
 	++good;
       }
     }
+    cout << endl;
   }
   return good/(width*(double)height);
 }
+
 
 
 double ImageSet::percentMatch(CImg<uchar> &one, CImg<uchar> &two) {

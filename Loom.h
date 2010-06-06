@@ -6,19 +6,22 @@
 
 #include<vector>
 #include<map>
-
+typedef unsigned char uchar;
 #include "ImageSet.h"
 
 
-
 typedef std::vector <std::vector <int> > Configuration;
+
+
+
+void print(const Configuration& src);
 
 
 class Loom { 
   
   Configuration config;
   std::multimap<int,char**> weights;
-  ImageSet library;
+  //  ImageSet library;
   cimg_library::CImg<uchar> pattern;
 
   int cellularWidth;
