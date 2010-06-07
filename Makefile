@@ -27,8 +27,8 @@ OBJS = main$(OBJ) ImageSet$(OBJ) Loom$(OBJ) LJFS_Utils$(OBJ)
 CC = g++
 DEBUG = -g
 OPTIMIZE = -O3
-#RUN = $(OPTIMIZE)
-RUN = $(DEBUG)
+RUN = $(OPTIMIZE)
+#RUN = $(DEBUG)
 CFLAGS = -Wall -Wextra  -c $(RUN) $(OSFLAGS) $(OSCFLAGS)
 LFLAGS = -Wall -Wextra  $(RUN) $(OSFLAGS) $(OSLFLAGS)
 

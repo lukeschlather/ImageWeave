@@ -187,68 +187,68 @@ Configuration ImageSet::geneticAlgorithm(CImg<uchar> & mold, int iterations, int
   
   for (int iter=0; iter < iterations ;++iter )  {
     multimap<double,int> quality;
-    //int step = (popcount/60)+1;
+    int step = (popcount/60)+1;
     printCurrentTime();
-    //cout << "Calculating fitness [=";
+    cout << "Calculating quality [=";
     for (int current=0;current<popcount;++current) {
       //progress bar
-      /*      if(current%step == 0 ) {
+      if(current%step == 0 ) {
 	cout << "=" << flush;
-	} */
+      } 
 
       double currentQual=0;
       for(int x=0;x<frameWidth;++x) {
 	for (int y=0;y<frameHeight;++y) {
-	  //cout << endl << "image (" << x << ", " << y << ") ";
+
 	  double match = percentMatch(mold,x*width,y*height,bunch[population[current][x][y]]);
 	  if (match > pct) {
 	    currentQual+= match*5;
 	  }
 	  currentQual+=match;
-	  //	  cout << match << ",";
+
 	}
-	//	cout << endl;
+
       }
       quality.insert(pair<double,int>(currentQual,current));
     }
     cout << "]" << endl;
 
-
-    vector < Configuration > newPop;
-    multimap<double,int>::reverse_iterator begin,end;
-    begin=quality.rbegin();
-    best=begin->second;
-    prevBestQuality=bestQuality;
-    bestQuality=begin->first;
-    end=quality.rend();
-
-    int breedcount=ceil(popcount/3);
-    // Take the top third and breed a random subset of them to populate the array.
-    cout << " Best of the population: ";
-    for (int i=0;i< breedcount;++i) {
-      cout << begin->first << " ";
+    if(iter+1<iterations) {
+      vector < Configuration > newPop;
+      multimap<double,int>::reverse_iterator begin,end;
+      begin=quality.rbegin();
+      best=begin->second;
+      prevBestQuality=bestQuality;
+      bestQuality=begin->first;
+      end=quality.rend();
+      
+      int breedcount=ceil(popcount/3);
+      // Take the top third and breed a random subset of them to populate the array.
+      cout << " Best of the population: ";
+      for (int i=0;i< breedcount;++i) {
+	cout << begin->first << " ";
       newPop.push_back(population[(begin++)->second]);
       if( !(rand()%4) ) {
 	population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
       }
       population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
-      //      cout <<"fload"<< endl;
-    }
-    //    cout << endl;
-    population=newPop;
 
-    while((int)population.size() < popcount) {
-      if ( rand()%3) {
-	population.push_back(
-			     mate(
-				  newPop[rand()%breedcount],
-				  newPop[rand()%breedcount]
-				  ));
+      }
+
+      population=newPop;
+
+      while((int)population.size() < popcount) {
+	if ( rand()%3) {
+	  population.push_back(
+			       mate(
+				    newPop[rand()%breedcount],
+				    newPop[rand()%breedcount]
+				    ));
       } else {
-	population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
+	  population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
+	}
       }
     }
-
     cout << "Best of iteration: " << iter << ": " << bestQuality << ", index: " << best << endl;
     // not the best idea... maybe
     // if( bestQuality == prevBestQuality ) {
@@ -271,28 +271,19 @@ double ImageSet::percentMatch(int img1, int img2) {
 
 double ImageSet::percentMatch(CImg<uchar> &mold, double moldMinX, double moldMinY, CImg<uchar> &two) {
   double good=0;
-  //  cout <<  "matching:" << "(" << moldMinX << ", " << moldMinY << "): " << two << endl;
   for (int x=0;x<width;++x) {
     for (int y=0;y<height;++y) {
       bool isgood=1;
       //unroll?
-      //  cout << "m[" << moldMinX + x << " "  << moldMinY +y << "]: rgb(";
       for (int c=0;c<3;++c) {
-	//cout << (int)mold(moldMinX + x,moldMinY +y,c) << " ";
-      }
-      //      cout << ") - c[" << x << " " << y << "]: rgb(" ;
-      for (int c=0;c<3;++c) {
-	//	cout << (int)two(x,y,c) << " ";
 	if ( abs( ((int) mold(moldMinX + x,moldMinY +y,c) )- (int)two(x,y,c) ) > threshold ) {
 	  isgood=false;
 	}
       }
-      cout << ", ";
       if (isgood) {
 	++good;
       }
     }
-    cout << endl;
   }
   return good/(width*(double)height);
 }
