@@ -134,13 +134,14 @@ vector< vector<int> > randomConfiguration(int frameWidth, int frameHeight,int ma
 	current[x].push_back(rand()%max);
 	//strictly speaking I guess jazz would need a good random number generator.
 	// though perhaps jazz is about a sort of order through chaos.
+	// so that could actually be compatible with a bad random number generator.
       }
     }
     return current;
 }
 
-vector< vector<int> > mate(vector< vector<int> >& one,vector< vector<int> >two) {
-  vector< vector<int> > ret;
+Configuration mate(Configuration& one,Configuration &two) {
+  Configuration ret;
   int left=0;
   int right=0;
   for(unsigned int i=0;i<one.size();++i) {
@@ -161,9 +162,11 @@ vector< vector<int> > mate(vector< vector<int> >& one,vector< vector<int> >two) 
   return ret;
 }
 
-Configuration ImageSet::geneticAlgorithm(CImg<uchar> & mold, int iterations, int popcount, int thresh, double pct) {
+Configuration ImageSet::geneticAlgorithm(CImg<uchar> & mold, int iterations, int popcount, int thresh, double pct,  int mutationRate) {
   //this needs to be refactored away
   threshold=thresh;
+
+
   int best=-1;
   int prevBestQuality = -2;
   int bestQuality= -1;
@@ -225,31 +228,36 @@ Configuration ImageSet::geneticAlgorithm(CImg<uchar> & mold, int iterations, int
       int breedcount=ceil(popcount/3);
       // Take the top third and breed a random subset of them to populate the array.
       cout << " Best of the population: ";
+
+      if(popcount>10) {
+	for (int i=0;i<5;++i) {
+	  cout << begin->first << " ";
+	  newPop.push_back(population[(begin++)->second]);
+	}
+      }
       for (int i=0;i< breedcount;++i) {
 	cout << begin->first << " ";
-      newPop.push_back(population[(begin++)->second]);
-      if( !(rand()%4) ) {
-	population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
+	if( (rand()%5) ) {
+	  newPop.push_back(population[(begin++)->second]);
+	} else {
+	  newPop.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
+	}
       }
-      population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
-
-      }
-
+      
       population=newPop;
-
+      for (int i=0;i<breedcount*mutationRate;++i) {
+	population[rand()%population.size()][rand()%frameWidth][rand()%frameHeight]=rand()%this->count();
+      }
       while((int)population.size() < popcount) {
-	if ( rand()%3) {
 	  population.push_back(
 			       mate(
 				    newPop[rand()%breedcount],
 				    newPop[rand()%breedcount]
 				    ));
-      } else {
-	  population.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
-	}
+
       }
     }
-    cout << "Best of iteration: " << iter << ": " << bestQuality << ", index: " << best << endl;
+    cout << endl << "Best of iteration: " << iter << ": " << bestQuality << ", index: " << best << endl;
     // not the best idea... maybe
     // if( bestQuality == prevBestQuality ) {
     //   cout << "No change; quitting." << endl;

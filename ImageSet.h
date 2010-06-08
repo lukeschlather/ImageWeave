@@ -75,7 +75,7 @@ public:
   // threshold and percentage bounds.
   std::map<int, std::vector<int> > & sort(int thresh,double pct);
 
-  std::vector< std::vector<int> > geneticAlgorithm(cimg_library::CImg<uchar> & mold, int iterations, int popcount, int thresh, double pct);
+  std::vector< std::vector<int> > geneticAlgorithm(cimg_library::CImg<uchar> & mold, int iterations, int popcount, int thresh, double pct,int mutationRate=100);
 
   double percentMatch(int img1, int img2);
   double percentMatch(cimg_library::CImg<uchar> &one, cimg_library::CImg<uchar> &two);
