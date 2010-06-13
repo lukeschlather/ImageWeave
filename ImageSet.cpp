@@ -83,38 +83,47 @@ Image ImageSet::weaveAll(int h, int w) {
   return this->weave(all);
 }
 
+
 Configuration ImageSet::unravel(CImg<uchar> & input) {
 
   Configuration ret;
   int frameWidth = input.width() / width;
   int frameHeight = input.height() / height;
   CImg<uchar> tmp(width,height,1,3,0); 
+
+
+  for (int x=0;x<frameWidth;++x) {
+    ret.push_back(vector<int>());
+    for (int y=0;y<frameHeight;++y) {
+      for(int a=0;a<width;++a) {
+	for(int b=0;b<height;++b) {
+	  tmp(a,b,0)= input( x*width + a,y*height + b,0);
+  	  tmp(a,b,1)= input( x*width + a,y*height + b,1);
+  	  tmp(a,b,2)= input( x*width + a,y*height + b,2);
+  	}
+	cout << endl;
+      }
+      bunch.push_back(tmp);
+      ret[x].push_back(bunch.size()-1);
+    }
+
+  }
+  print(ret);
+  return ret;
+}
+
+
+Image ImageSet::weave(vector< vector<int> >& matrix) {
+  double frameWidth=matrix.size();
+  double frameHeight=matrix[0].size();
+  
+  Image ret(frameWidth*width,frameHeight*height,1,3,0);
   
   for (int x=0;x<frameWidth;++x) {
     for (int y=0;y<frameHeight;++y) {
       for(int a=0;a<width;++a) {
-	for(int b=0;b<height;++b) {
-	  tmp(a,b,0)= input( x*width + a,y*height + b,0); 
-  	  tmp(a,b,1)= input( x*width + a,y*height + b,1); 
-  	  tmp(a,b,2)= input( x*width + a,y*height + b,2); 
-  	}
-      }
-    }
-  }
-  return ret;
-}
-
-Image ImageSet::weave(vector< vector<int> >& matrix) {
-  double xdim=matrix.size();
-  double ydim=matrix[0].size();
-  
-  Image ret(xdim*width,ydim*height,1,3,0);
-  
-  for (int x=0;x<xdim;++x) {
-    for (int y=0;y<ydim;++y) {
-      for(int a=0;a<width;++a) {
   	for(int b=0;b<height;++b) {
-	  CImg<uchar> &src =  bunch[matrix[y][x]];
+	  CImg<uchar> &src =  bunch[matrix[x][y]];
 	  ret( x*width + a,y*height + b,0)= src(a,b,0);
 	  ret( x*width + a,y*height + b,1)= src(a,b,1);
 	  ret( x*width + a,y*height + b,2)= src(a,b,2);
@@ -204,9 +213,9 @@ Configuration ImageSet::geneticAlgorithm(CImg<uchar> & mold, int iterations, int
 	for (int y=0;y<frameHeight;++y) {
 
 	  double match = percentMatch(mold,x*width,y*height,bunch[population[current][x][y]]);
-	  if (match > pct) {
-	    currentQual+= match*5;
-	  }
+	  // if (match > pct) {
+	  //   currentQual+= match*5;
+	  // }
 	  currentQual+=match;
 
 	}
@@ -225,29 +234,36 @@ Configuration ImageSet::geneticAlgorithm(CImg<uchar> & mold, int iterations, int
       bestQuality=begin->first;
       end=quality.rend();
       
-      int breedcount=ceil(popcount/3);
+      int breedcount=ceil(popcount/2);
       // Take the top third and breed a random subset of them to populate the array.
       cout << " Best of the population: ";
 
-      if(popcount>10) {
-	for (int i=0;i<5;++i) {
-	  cout << begin->first << " ";
-	  newPop.push_back(population[(begin++)->second]);
-	}
-      }
       for (int i=0;i< breedcount;++i) {
 	cout << begin->first << " ";
-	if( (rand()%5) ) {
+	if( (rand()%3) ) {
 	  newPop.push_back(population[(begin++)->second]);
 	} else {
 	  newPop.push_back(randomConfiguration(frameWidth,frameHeight,this->count()));
 	}
       }
+
       
       population=newPop;
-      for (int i=0;i<breedcount*mutationRate;++i) {
-	population[rand()%population.size()][rand()%frameWidth][rand()%frameHeight]=rand()%this->count();
+      // We want to create mutations, but we want to protect the top
+      // 10 configurations from mutating, unless we have fewer than 10
+      // configurations.
+      int mutatingPopSize = population.size();
+      int complementMutatingPopSize = 0;
+      if(popcount>10) {
+	mutatingPopSize-=10;
+	complementMutatingPopSize = 10;
       }
+
+      for (int i=0;i<breedcount*mutationRate;++i) {
+      	population[(rand()%(mutatingPopSize) +complementMutatingPopSize)][rand()%frameWidth][rand()%frameHeight]=rand()%this->count();
+      }
+
+      // We've finished mutating the breeders, and are now ready to breed them.
       while((int)population.size() < popcount) {
 	  population.push_back(
 			       mate(
@@ -257,7 +273,7 @@ Configuration ImageSet::geneticAlgorithm(CImg<uchar> & mold, int iterations, int
 
       }
     }
-    cout << endl << "Best of iteration: " << iter << ": " << bestQuality << ", index: " << best << endl;
+    cout << endl << "Best of iteration " << iter << ": " << bestQuality << "/" << frameWidth*frameHeight << ", index: " << best << endl;
     // not the best idea... maybe
     // if( bestQuality == prevBestQuality ) {
     //   cout << "No change; quitting." << endl;
