@@ -20,10 +20,10 @@ BOOSTFLAGS = -I/usr/include/boost/filesystem -l:/usr/lib/libboost_filesystem-mt.
 CIMGFLAGS = -L/usr/X11R6/lib -lm -lpthread -lX11 
 OSLFLAGS =  ${CIMGFLAGS} ${BOOSTFLAGS}
 TARGET = ImageWeave
-USEMAGICK = 1
+SIM = Similar
 endif
 
-OBJS = main$(OBJ) ImageSet$(OBJ) Loom$(OBJ) LJFS_Utils$(OBJ)
+OBJS =  ImageSet$(OBJ) Loom$(OBJ) LJFS_Utils$(OBJ)
 CC = g++
 DEBUG = -g
 OPTIMIZE = -O3
@@ -38,16 +38,16 @@ LFLAGS = -Wall -Wextra  $(RUN) $(OSFLAGS) $(OSLFLAGS)
 # LFLAGS = /Fe$(TARGET) ../platforms/win/freeglut_static.lib opengl32.lib user32.lib gdi32.lib kernel32.lib
 # endif
 
-# ifdef USEMAGICK
-# MAGICKFLAGS = `Magick++-config --cppflags --cxxflags --ldflags --libs` 
-# endif
 
-$(TARGET) : $(OBJS)
+$(TARGET) : $(OBJS) main$(OBJ)
 ifeq ($(OSTYPE),win32)
-	$(CC) $(LFLAGS) $(OBJS)
+	$(CC) $(LFLAGS) $(OBJS) 
 else
-	$(CC)  $(OBJS) -o $(TARGET) $(LFLAGS) $(MAGICKFLAGS)
+	$(CC)  $(OBJS) main$(OBJ) -o $(TARGET) $(LFLAGS) 
 endif
+
+$(SIM) : $(OBJS) Similarity.cpp
+	$(CC)  $(OBJS) Similarity.cpp -o $(SIM) $(LFLAGS) 
 
  main$(OBJ) : main.cpp ImageSet.h
 	$(CC) $(CFLAGS) main.cpp

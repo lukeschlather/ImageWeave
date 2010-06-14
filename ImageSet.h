@@ -10,11 +10,32 @@ typedef unsigned char uchar;
 typedef cimg_library::CImg<uchar> Image;
 
 typedef std::vector <std::vector <int> > Configuration;
-class Node;
+/* class Node; */
 
-class Node : public std::pair<int, std::vector<Node> > {
+/* class Node : public std::pair<int, std::vector<Node> > { */
   
+/* }; */
+
+
+typedef unsigned char uchar;
+template <class T>
+class CImgView {
+public:
+  double topX,topY,width,height;
+  cimg_library::CImg<T>& base;
+  CImgView<T>(cimg_library::CImg<T>& bas, double x, double y);
+  CImgView<T>(cimg_library::CImg<T>& bas, double x, double y,double wid, double hei);
+  CImgView<T>(cimg_library::CImg<T>& bas);
+
+
+  T & operator()(double x, double y, double c) {
+    return base(topX+x,topY+y,c);
+  }
+
+  
+
 };
+
 
 // Luke Schlather
 // Tuesday, April 13 2010
@@ -35,7 +56,7 @@ public:
   // 3: imagedir is not a directory.
   ImageSet(const char* imagedir);
   ImageSet(const ImageSet& src);
-
+  ImageSet();
 
 
 
@@ -74,10 +95,13 @@ public:
   // A map holding groups of ids that fall within 
   // threshold and percentage bounds.
   std::map<int, std::vector<int> > & sort(int thresh,double pct);
+  void setThreshold(uchar thresh) { threshold=thresh;}
 
   std::vector< std::vector<int> > geneticAlgorithm(cimg_library::CImg<uchar> & mold, int iterations, int popcount, int thresh, double pct,int mutationRate=100);
+  std::vector< std::vector<int> > bruteForce (cimg_library::CImg<uchar> & mold, int thresh, double pct);
 
   double percentMatch(int img1, int img2);
+  double percentMatch(CImgView<uchar> one, CImgView<uchar> two);
   double percentMatch(cimg_library::CImg<uchar> &one, cimg_library::CImg<uchar> &two);
   double percentMatch(cimg_library::CImg<uchar> &mold, double moldMinX, double moldMinY, cimg_library::CImg<uchar> &two);
   int avgDistance(int img1, int img2);

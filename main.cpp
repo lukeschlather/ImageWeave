@@ -92,13 +92,15 @@ int main(int argc, char** argv) {
 
 
   ImageSet bunch = ImageSet(directory.c_str());
+
   cout << "Read in " << bunch.count() << " images." << endl;
   
   CImgDisplay library(  bunch.weaveAll(10,10), "Image Library");
   //bunch.sort(threshold,pct);
   CImg<uchar> mold(moldPath.c_str());
   CImgDisplay blank(mold);
-  vector< vector<int> > tapestry = bunch.geneticAlgorithm(mold,iterations,popcount,threshold,pct);
+
+  vector< vector<int> > tapestry = bunch.bruteForce(mold,threshold,pct);
   CImgDisplay result(bunch.weave(tapestry));
   while ( !library.is_closed() ) {
     library.wait();
