@@ -1,6 +1,6 @@
 // Luke Schlather
 // Saturday, April 17 2010
-// Licensed under the LGPL
+// Licensed under the GPLv3
 #include<iostream>
 #include "Loom.h"
 #include<vector>

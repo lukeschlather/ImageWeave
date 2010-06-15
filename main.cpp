@@ -1,6 +1,6 @@
 // Luke Schlather
 // Monday, April 12 2010
-// Licensed under the LGPL
+// Licensed under the GPLv3
 #include <boost/filesystem.hpp>
 #include <boost/thread/thread.hpp>
 #include <iostream>

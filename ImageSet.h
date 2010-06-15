@@ -1,3 +1,6 @@
+// Luke Schlather
+// Monday, June 14 2010
+// Licensed under the GPLv3
 #ifndef _IMAGELOADER_
 #define _IMAGELOADER_
 #include "CImg.h"

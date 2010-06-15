@@ -1,6 +1,6 @@
 // Luke Schlather
 // Friday, April 30 2010
-// Licensed under the LGPL
+// Licensed under the GPLv3
 #include<iostream>
 #include <stdio.h>
 #include <stdlib.h>
