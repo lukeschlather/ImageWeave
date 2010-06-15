@@ -228,7 +228,7 @@ std::vector< std::vector<int> > ImageSet::bruteForce (cimg_library::CImg<uchar> 
 
 	double match = percentMatch(CImgView<uchar>(mold,x*width,y*height,width,height),
 				    bunch[i]);
-	//match-=(used[i]/100);
+	match/=used[i]/100;
 	if (bestMatch<match) {
 	  bestIndex=i;
 	  bestMatch=match;
