@@ -54,7 +54,11 @@ Currently, the bruteForce method uses a greedy strategy that penalizes image re-
 
 Given that that array is initialized to 0, I am not entirely clear on how the program is functioning. Initially I attempted this method which only marginally penalized repeats:
     	match-=used[i]/100;
-but that resulted in 
+	
+Actually, on some reflection this may be the version that gets good results. More on that when we turn to:
+
+#Bugs
+It does this a lot:
      *** glibc detected *** ./ImageWeave: double free or corruption (out): 0x00000000018d78b0 ***
      ======= Backtrace: =========
      /lib/libc.so.6(+0x775b6)[0x7f11e4fc35b6]
@@ -64,6 +68,7 @@ but that resulted in
      /lib/libc.so.6(__libc_start_main+0xfd)[0x7f11e4f6ac4d]
      ./ImageWeave[0x4044b9]
      ======= Memory map: ========
-... and so on. Commenting out that single line of code fixed it, but resulted in it re-using a handful of images many times over, so I opted for the dividing solution, which works fairly well, apart from violating a fundamental law of mathematics. 
-
-I'll be cleaning this up a bit more fairly soon, but if anyone has some insight into why I'm not dividing by zero, that would be much appreciated. 
+... and so on. Initially I thought this approach: 
+    	match-=used[i]/100;
+	
+was the culprit, so changed it to the division version, banged out make && run, and walked away. While I was taking a break, I realized I was dividing by zero. Mysteriously it worked. There may be something funky with the Makefile. In any case, one of these approaches produces good results, both of them cause random glibc crashes, work remains to be done.
