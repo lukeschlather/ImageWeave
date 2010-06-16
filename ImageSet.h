@@ -19,8 +19,8 @@ typedef std::vector <std::vector <int> > Configuration;
   
 /* }; */
 
-
 typedef unsigned char uchar;
+
 template <class T>
 class CImgView {
 public:

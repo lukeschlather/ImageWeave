@@ -44,8 +44,9 @@ string printCurrentTime() {
   struct tm *tmp;
   tmp = localtime(&t);
 
-  strftime(buffer,40,"%F %T",tmp);
+  strftime(buffer,40,"%F %H.%M.%S",tmp);
   string now(buffer);
   cout << now << endl;
+
   return now;
 }

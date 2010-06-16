@@ -56,7 +56,7 @@ ImageSet::ImageSet(const char* imagedir) {
         }
         else if ( fs::is_regular_file( dir_itr->status() ) )  {
 	  // We have a real file, let's try to read it in.
-          std::cout << "Reading" << dir_itr->path().filename() << "\n";
+          std::cout << "Reading " << dir_itr->path().filename() << "\n";
 	  CImg<uchar> image(dir_itr->path().external_file_string().c_str());
 	  double iwidth = image.width();
 	  double iheight = image.height();
@@ -210,31 +210,31 @@ std::vector< std::vector<int> > ImageSet::bruteForce (cimg_library::CImg<uchar> 
   // populate a randomized vector of configurations to serve as the initial population.
   Configuration ret;
   multimap<double,int> quality;
-  int step = (frameWidth*frameHeight/60)+1;
+  int step = (frameWidth/60)+1;
   
   vector<double> used;
   used.resize(bunch.width(),0);
   printCurrentTime();
-  cout << "Processing: " << endl << "[=" << flush;
+  cout << "Finding optimal Configuration: " << endl << "[=" << flush;
   for(int x=0;x<frameWidth;++x) {
+    if((x%step)==0) {
+      cout << "=" << flush;
+    }
     ret.push_back(vector<int>());
     for (int y=0;y<frameHeight;++y) {
-      if((x*y)%step==0) {
-	cout << "=" << flush;
-      }
       double bestMatch=0;
       int bestIndex=-1;
       for (int i=0;i<bunch.width();++i) {
 
 	double match = percentMatch(CImgView<uchar>(mold,x*width,y*height,width,height),
-				    bunch[i]);
+				    CImgView<uchar>(bunch[i]));
 	match/=used[i]/100;
 	if (bestMatch<match) {
 	  bestIndex=i;
 	  bestMatch=match;
 	}
       }
-      cout << "Best Match: " << bestMatch << " Best Index: " << bestIndex << " Used:" << used[bestIndex] << endl;
+      //cout << "Best Match: " << bestMatch << " Best Index: " << bestIndex << " Used:" << used[bestIndex] << endl;
       used[bestIndex] = used[bestIndex]+1;
       ret[x].push_back(bestIndex);
     }

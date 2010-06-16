@@ -2,10 +2,8 @@ ImageWeave
 ==================
 Author: Luke Schlather
 
+This is a work-in-progress designed to take a bunch of images and a 'mold' image, and arrange the images so they look like the mold. It defines two functions which aim to do this: bruteForce, which is actually a greedy algorithm, and geneticAlgorithm, which while it does what it says, doesn't work very well for the sample sizes I've tested (up to 500 images on a  3288x2466 mold.)
 
-ImageWeave is a program designed to take a set of images and a target image and 'weave' the images such that they resemble the target image, creating a sort of photo mosaic. 
-
-The program defines two routines that are supposed to do this, one is effectively brute force, the other claims to be a genetic algorithm, but is far outperformed by brute force. 
 
 #Building 
 I have only tested this on Ubuntu 10.04. I did do some initial work a couple months ago on 9.10, so it should also be alright there. 
@@ -41,6 +39,10 @@ Cell Width and height can be set as follows:
      -y10
 They default to 24x18
 
+It will drop a copy of the finished product in the directory set by the flag:
+     -o /home/project/output/
+/home/project/output/ is the default directory.
+
 #Method
 
 ##Similarity metric
@@ -52,13 +54,12 @@ This method iterates over every cell in the image (by default defined as a 24x18
 Currently, the bruteForce method uses a greedy strategy that penalizes image re-use by this formula:
     	match/=used[i]/100;
 
-Given that that array is initialized to 0, I am not entirely clear on how the program is functioning. Initially I attempted this method which only marginally penalized repeats:
+Given that that array is initialized to 0, I am not entirely clear on how the program is functioning without floating point exceptions. Initially I attempted this method which only marginally penalized repeats:
     	match-=used[i]/100;
-	
-Actually, on some reflection this may be the version that gets good results. More on that when we turn to:
+Dividing seems to work better. 
 
 #Bugs
-It does this a lot:
+It does this sometimes:
      *** glibc detected *** ./ImageWeave: double free or corruption (out): 0x00000000018d78b0 ***
      ======= Backtrace: =========
      /lib/libc.so.6(+0x775b6)[0x7f11e4fc35b6]

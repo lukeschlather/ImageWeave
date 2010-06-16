@@ -6,7 +6,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <string>
-
+#include "LJFS_Utils.h"
 #include "ImageSet.h"
 #include "Loom.h"
 
@@ -40,9 +40,10 @@ int main(int argc, char** argv) {
   char c;
   string directory("/home/project");
   string moldPath("/home/project/Pittsburgh_November_035.JPG");
+  string outputDirectory("/home/project/output/");
   string usage("ImageWeave -d <directory> \n -h : Print this message. \n -x <width> : set x dimension for image cells  \n -y <height> : set y dimension for image cells \n");
 
-  while ((c =getopt(argc,argv,"hd:s:x:y:t:p:m:i:c:"))!=-1) {
+  while ((c =getopt(argc,argv,"hd:s:x:y:t:p:m:i:c:o:"))!=-1) {
     switch(c) {
     case 'h':
       cout << usage << endl;
@@ -56,6 +57,9 @@ int main(int argc, char** argv) {
       break;
     case 'd':
       directory = string(optarg);
+      break;
+    case 'o':
+      outputDirectory=string(optarg);
       break;
     case 'y':
       ImageSet::setHeight(atof(optarg));
@@ -101,11 +105,23 @@ int main(int argc, char** argv) {
   CImgDisplay blank(mold);
 
   vector< vector<int> > tapestry = bunch.bruteForce(mold,threshold,pct);
-  CImgDisplay result(bunch.weave(tapestry));
-  while ( !library.is_closed() ) {
-    library.wait();
+  CImg<uchar> output= bunch.weave(tapestry);
+
+
+  fs::path outdir(outputDirectory);
+  fs::path moldfile(moldPath);
+  string name = moldfile.filename();
+  stringstream outfilename(outputDirectory);
+  outfilename << printCurrentTime() << name << "-t" << threshold << "_" << bunch.count() << ".ppm";
+  cout << "Writing " << outfilename.str() << endl;
+  output.save((outputDirectory + outfilename.str()).c_str());
+
+
+  CImgDisplay result(output);
+  // while ( !result.is_closed() ) {
+  //   result.wait();
     
-  }
+  // }
   return 0;
 }
 
