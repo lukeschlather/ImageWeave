@@ -49,11 +49,8 @@ endif
 $(SIM) : $(OBJS) Similarity.cpp
 	$(CC)  $(OBJS) Similarity.cpp -o $(SIM) $(LFLAGS) 
 
- main$(OBJ) : main.cpp ImageSet.h
+main$(OBJ) : main.cpp ImageSet.h
 	$(CC) $(CFLAGS) main.cpp
-
-# Application$(OBJ) : Application.cpp Application.h Tesselator.h polygon.h fim.h
-# 	$(CC) $(CFLAGS) Application.cpp
 
 Loom$(OBJ) : Loom.h Loom.cpp
 	$(CC) $(CFLAGS) Loom.cpp
@@ -64,7 +61,7 @@ ImageSet$(OBJ) : ImageSet.h ImageSet.cpp
 LJFS_Utils$(OBJ): LJFS_Utils.h LJFS_Utils.cpp
 	$(CC) $(CFLAGS) LJFS_Utils.cpp
 clean:
-	-$(RM) -f *$(OBJ) *~ $(TARGET)
+	-$(RM) -f *$(OBJ) *~ $(TARGET) $(SIM)
 
 
 

@@ -2,7 +2,7 @@ ImageWeave
 ==================
 Author: Luke Schlather
 
-This is a work-in-progress designed to take a bunch of images and a 'mold' image, and arrange the images so they look like the mold. It defines two functions which aim to do this: bruteForce, which is actually a greedy algorithm, and geneticAlgorithm, which while it does what it says, doesn't work very well for the sample sizes I've tested (up to 500 images on a  3288x2466 mold.)
+This is a work-in-progress designed to take a bunch of images and a 'mold' image, and arrange the images so they look like the mold. It defines two functions which aim to do this: bruteForce, which is actually a greedy algorithm, and geneticAlgorithm, which while it does what it says, pretty much doesn't work for the sample sizes I've tested (up to 500 images on a  3288x2466 mold.)
 
 
 #Building 
@@ -39,7 +39,7 @@ Cell Width and height can be set as follows:
      -y10
 They default to 24x18
 
-It will drop a copy of the finished product in the directory set by the flag:
+It will drop a copy of the finished image in the directory set by the flag -o:
      -o /home/project/output/
 /home/project/output/ is the default directory.
 
@@ -54,22 +54,9 @@ This method iterates over every cell in the image (by default defined as a 24x18
 Currently, the bruteForce method uses a greedy strategy that penalizes image re-use by this formula:
     	match/=used[i]/100;
 
-Given that that array is initialized to 0, I am not entirely clear on how the program is functioning without floating point exceptions. Initially I attempted this method which only marginally penalized repeats:
+Where used[i] is the number of times the image has been used + 1. Initially I attempted this method which only marginally penalized repeats:
     	match-=used[i]/100;
 Dividing seems to work better. 
 
 #Bugs
-It does this sometimes:
-     *** glibc detected *** ./ImageWeave: double free or corruption (out): 0x00000000018d78b0 ***
-     ======= Backtrace: =========
-     /lib/libc.so.6(+0x775b6)[0x7f11e4fc35b6]
-     /lib/libc.so.6(cfree+0x73)[0x7f11e4fc9e53]
-     ./ImageWeave[0x406dc8]
-     ./ImageWeave[0x471852]
-     /lib/libc.so.6(__libc_start_main+0xfd)[0x7f11e4f6ac4d]
-     ./ImageWeave[0x4044b9]
-     ======= Memory map: ========
-... and so on. Initially I thought this approach: 
-    	match-=used[i]/100;
-	
-was the culprit, so changed it to the division version, banged out make && run, and walked away. While I was taking a break, I realized I was dividing by zero. Mysteriously it worked. There may be something funky with the Makefile. In any case, one of these approaches produces good results, both of them cause random glibc crashes, work remains to be done.
+Occasionally squiggles have shown up on a handful of cells in the output image. Also, I was getting glibc : double free or corruption stack traces that wouldn't go away until I rebooted. I'm not sure if it's possible I managed to corrupt glibc. But it did happen, and it's gone after a reboot.

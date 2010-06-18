@@ -57,7 +57,8 @@ public:
   // Error codes:
   // 2: imagedir does not exist.
   // 3: imagedir is not a directory.
-  ImageSet(const char* imagedir);
+  ImageSet(const char* imagedir,bool recurse=0);
+  void readImagesFromDirectory(const char* imagedir,bool recurse=0);
   ImageSet(const ImageSet& src);
   ImageSet();
 
