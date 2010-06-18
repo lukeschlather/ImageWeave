@@ -23,7 +23,7 @@ Should get you the version of  CImg I'm using, though I pulled that copy as of 2
 ##Use
 
 At the moment, a typical usage might look like this:
-    ./ImageWeave -m /home/project/testS.png -d /home/project/colors/ -t50
+    ./ImageWeave -m /home/project/testS.png -d /home/project/colors/ -R
     
 Breaking these options down:
 
@@ -31,8 +31,10 @@ Breaking these options down:
 This is the target "mold" image.
     -d /home/project/colors/
 This is the directory where the program reads images. It does not recurse, and though it should simply throw an error if you give it something that isn't an image, behavior is undefined if non-image files exist in this directory.
+    -R
+Search the target directory recursively. 
      -t50
-This is the threshold for deciding if a color matches. Color is stored in 24 bits to define the color for a pixel, that is, three 8-bit unsigned chars which define the red, green, and blue color channels. The value should be from 0-255, otherwise it will overflow. 
+This is the threshold for deciding if a color matches. Color is stored in 24 bits to define the color for a pixel, that is, three 8-bit unsigned chars which define the red, green, and blue color channels. The value should be from 0-255, otherwise it will overflow. Currently this doesn't actually do anything; the program runs a battery everywhere from 0-100 stepping by 10 so you can compare. 
 
 Cell Width and height can be set as follows:
      -x20
@@ -59,4 +61,5 @@ Where used[i] is the number of times the image has been used + 1. Initially I at
 Dividing seems to work better. 
 
 #Bugs
-Occasionally squiggles have shown up on a handful of cells in the output image. Also, I was getting glibc : double free or corruption stack traces that wouldn't go away until I rebooted. I'm not sure if it's possible I managed to corrupt glibc. But it did happen, and it's gone after a reboot.
+
+There was a glibc : double free or corruption issue, but I believe I've fixed that...
