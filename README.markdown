@@ -2,7 +2,7 @@ ImageWeave
 ==================
 Author: Luke Schlather
 
-This is a work-in-progress designed to take a bunch of images and a 'mold' image, and arrange the images so they look like the mold. It defines two functions which aim to do this: bruteForce, which is actually a greedy algorithm, and geneticAlgorithm, which while it does what it says, pretty much doesn't work for the sample sizes I've tested (up to 500 images on a  3288x2466 mold.)
+This is a work-in-progress designed to take a bunch of images and a 'mold' image, and arrange the images so they look like the mold. It defines two functions which aim to do this: bruteForce, which is actually a greedy algorithm, and geneticAlgorithm, which while it does something resembling a genetica algorithm, pretty much doesn't work for the sample sizes I've tested (up to 500 images on a  3288x2466 mold.)
 
 
 #Building 
@@ -19,11 +19,12 @@ should get you what you need as far as boost.
 
 Should get you the version of  CImg I'm using, though I pulled that copy as of 2010-04-08, so no guarantees after that date. :) 
 
+If you have those things, it should be a simple matter of typing `make`. CImg is a template library.
 
 ##Use
 
 At the moment, a typical usage might look like this:
-    ./ImageWeave -m /home/project/testS.png -d /home/project/colors/ -R
+    ./ImageWeave -m /home/project/testS.png -d /home/project/colors/ -R -t 50
     
 Breaking these options down:
 
