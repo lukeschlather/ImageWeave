@@ -56,6 +56,7 @@ ImageSet::ImageSet(const char* imagedir, bool recurse) {
 
 void ImageSet::readImagesFromDirectory(const char* imagedir, bool recurse ) {
     fs::directory_iterator end_iter;
+    int images=0;
     for ( fs::directory_iterator dir_itr( imagedir );
           dir_itr != end_iter;
           ++dir_itr )  {
@@ -76,12 +77,13 @@ void ImageSet::readImagesFromDirectory(const char* imagedir, bool recurse ) {
 	  double aspectRatio = iwidth/iheight;
 	  if (aspectRatio > .5 && aspectRatio < 2) {
 	    // cout << "'good' aspect ratio:" << aspectRatio << endl;
+	    ++images;
 	    bunch.push_back(image.resize(width,height));
 	    iwidth=bunch.back().width();
 	    iheight=bunch.back().height();
-	    cout << "\"" << dir_itr->path().external_file_string().c_str()  << "\"" << ":" << iwidth <<"x" << iheight << ", ";
+	    // cout << "\"" << dir_itr->path().external_file_string().c_str()  << "\"" << ":" << iwidth <<"x" << iheight << ", ";
 	  } else {
-	    cout << "bad: \"" << dir_itr->path().filename() << "\" " << aspectRatio << ": " << iwidth << "x" << iheight << ", ";
+	    // cout << "bad: \"" << dir_itr->path().filename() << "\" " << aspectRatio << ": " << iwidth << "x" << iheight << ", ";
 	  }
 	}
         else {
@@ -93,7 +95,7 @@ void ImageSet::readImagesFromDirectory(const char* imagedir, bool recurse ) {
         // std::cout << dir_itr->path().filename() << " " << ex.what() << std::endl;
       }
     }
-    cout << endl;
+    cout << "Read in " << images << " images." << endl;
 }
 
   ImageSet::ImageSet() {}
