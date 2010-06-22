@@ -6,8 +6,9 @@ This is a work-in-progress designed to take a bunch of images and a 'mold' image
 
 These blog posts have some example outputs, and talk a little bit about how I got the project to where it is:
 
-http://www.flinchbaughschlather.com/luke/programming/2010/06/16/imageweave/
-http://www.flinchbaughschlather.com/luke/programming/2010/06/20/imageweave/
+[June 16th](http://www.flinchbaughschlather.com/luke/programming/2010/06/16/imageweave/)
+
+[June 20th](http://www.flinchbaughschlather.com/luke/programming/2010/06/20/imageweave/)
 
 
 #Building 
