@@ -4,6 +4,11 @@ Author: Luke Schlather
 
 This is a work-in-progress designed to take a bunch of images and a 'mold' image, and arrange the images so they look like the mold. It defines two functions which aim to do this: bruteForce, which is actually a greedy algorithm, and geneticAlgorithm, which while it does something resembling a genetica algorithm, pretty much doesn't work for the sample sizes I've tested (up to 500 images on a  3288x2466 mold.)
 
+These blog posts have some example outputs, and talk a little bit about how I got the project to where it is:
+
+http://www.flinchbaughschlather.com/luke/programming/2010/06/16/imageweave/
+http://www.flinchbaughschlather.com/luke/programming/2010/06/20/imageweave/
+
 
 #Building 
 I have only tested this on Ubuntu 10.04. I did do some initial work a couple months ago on 9.10, so it should also be alright there. 
